@@ -28,10 +28,12 @@ import FuturedItem from '../../components/home/futuredItem';
 import SectionHeader from '../../components/home/sectionHeader';
 import AreaFilter from '../../components/home/areaFilter';
 import SubjectFilter from '../../components/home/subjectFilter';
+import { useUser } from '@clerk/clerk-expo';
 
 const { avatar } = images;
 
 export default function HomeScreen() {
+  const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
   const [loc, setLoc] = useState(locFullData);
   const [fLoc, setFLoc] = useState(locFFullData);
@@ -58,7 +60,7 @@ export default function HomeScreen() {
    * @description handles search for Loc and FLoc
    * @param {*} searchQuery
    */
-  const handleSearchChange = (searchQuery) => {
+  const handleSearchChange = (searchQuery: string) => {
     setSearchQuery(searchQuery);
     setLocFilterVisible(false);
     setFLocFilterVisible(false);
@@ -83,8 +85,8 @@ export default function HomeScreen() {
    * @description Function to filter Loc based on the selected Value
    * @param {*} subject
    */
-  const filterLocByType = (subject) => {
-    setSelectedSubject(subject);
+  const filterLocByType = (subject: string) => {
+    setSelectedSubject(subject as any);
 
     // Filter the teachers based on the selected subject
     if (subject.toLowerCase() === 'all subjects') {
@@ -106,11 +108,14 @@ export default function HomeScreen() {
         <View className="">
           {/** Get greeting based on current time */}
           <HeaderText text={getLocalGreeting()} />
-          <Text className="font-exo font-semibold text-lg">Omar Aglan</Text>
+          <Text className="font-exo font-semibold text-lg">{user?.firstName || 'User'}</Text>
         </View>
         {/** ============= Profile image/avatar ============ */}
         <View className="bg-bgWhite shadow-xl rounded-xl">
-          <Image source={avatar} style={{ height: 62, width: 62 }} />
+          <Image 
+            source={user?.imageUrl ? { uri: user.imageUrl } : avatar} 
+            style={{ height: 62, width: 62, borderRadius: 12 }} 
+          />
         </View>
       </View>
       {/** ================ Search Input  ========================= */}
@@ -162,7 +167,7 @@ export default function HomeScreen() {
             horizontal={true}
             className="w-full py-4 bg-transparent"
             renderItem={({ item }) => <LocItem teacher={item} />}
-            keyExtractor={(item, index) => item.name}
+            keyExtractor={(item, index) => item.name + index}
             showsHorizontalScrollIndicator={false}
           />
         </View>
